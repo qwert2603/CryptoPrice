@@ -2,7 +2,5 @@
     <string name="app_name">crypto price</string>
     <string name="enable_text">enable</string>
     <string name="loading_text">loading..</string>
-
-    <string name="icon_path">M1 1 S9 9 4.7 8.5 8 3 9 9</string>
     <string name="dev_info">telegram: qwert2603</string>
 </resources>

@@ -1,14 +1,14 @@
 package com.qwert2603.cryptoprice;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SwitchCompat;
 import android.widget.CompoundButton;
+import android.widget.Switch;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
     public static final String KEY_SERVICE_ON = "KEY_SERVICE_ON";
 
@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        SwitchCompat switchCompat = (SwitchCompat) findViewById(R.id.enable_Switch);
+        Switch switchCompat = findViewById(R.id.enable_Switch);
         switchCompat.setChecked(sharedPreferences.getBoolean(KEY_SERVICE_ON, false));
         switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
