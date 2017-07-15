@@ -5,9 +5,16 @@
     android:viewportHeight="10"
     android:viewportWidth="10">
 
-    <path
-        android:pathData="@string/icon_path"
-        android:strokeColor="@color/colorPrimary"
-        android:strokeWidth="0.6" />
+    <group
+        android:scaleX="-1"
+        android:translateX="10">
+
+        <path
+            android:pathData="M1 1 S9 9 4.7 8.5 8 3 9 8.3"
+            android:strokeColor="@color/colorPrimary"
+            android:strokeLineCap="round"
+            android:strokeWidth="0.6" />
+
+    </group>
 
 </vector>

@@ -8,29 +8,94 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
-import java.util.concurrent.TimeUnit;
+import org.json.JSONObject;
 
-import io.reactivex.Maybe;
-import io.reactivex.MaybeSource;
-import io.reactivex.Observable;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RequestService extends Service {
 
-    private Disposable disposable;
+    public static final String[] PAIRS = {
+            "btc_usd",
+            "btc_rur",
+            "btc_eur",
+            "ltc_btc",
+            "ltc_usd",
+            "ltc_rur",
+            "ltc_eur",
+            "nmc_btc",
+            "nmc_usd",
+            "nvc_btc",
+            "nvc_usd",
+            "usd_rur",
+            "eur_usd",
+            "eur_rur",
+            "ppc_btc",
+            "ppc_usd",
+            "dsh_btc",
+            "dsh_usd",
+            "dsh_rur",
+            "dsh_eur",
+            "dsh_ltc",
+            "dsh_eth",
+            "eth_btc",
+            "eth_usd",
+            "eth_eur",
+            "eth_ltc",
+            "eth_rur",
+    };
 
-    private static Rest rest = new Retrofit.Builder()
-            .baseUrl("https://btc-e.nz/api/3/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .build()
-            .create(Rest.class);
+    private volatile boolean isDestroyed = false;
+
+    private final Runnable loadRunnable = new Runnable() {
+        @Override
+        public void run() {
+            while (true) {
+                if (isDestroyed) break;
+
+                InputStream inputStream = null;
+                try {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.append("https://btc-e.nz/api/3/ticker/");
+                    for (String pair : PAIRS) {
+                        stringBuilder.append(pair).append('-');
+                    }
+                    stringBuilder.append("?ignore_invalid=1");
+                    Log.d("AASSDD", stringBuilder.toString());
+                    inputStream = new URL(stringBuilder.toString()).openStream();
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                    String line = bufferedReader.readLine();
+                    JSONObject jsonObject = new JSONObject(line);
+                    Map<String, Double> lastPrices = new HashMap<>();
+                    for (String pair : PAIRS) {
+                        lastPrices.put(pair, jsonObject.getJSONObject(pair).getDouble("last"));
+                    }
+                    if (!isDestroyed) showNotification(lastPrices);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (inputStream != null) {
+                        try {
+                            inputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
 
     @Nullable
     @Override
@@ -58,52 +123,28 @@ public class RequestService extends Service {
                 .build()
         );
 
-        disposable = Observable
-                .interval(2, TimeUnit.SECONDS)
-                .flatMapMaybe(new Function<Long, MaybeSource<Tickers>>() {
-                    @Override
-                    public MaybeSource<Tickers> apply(@NonNull Long aLong) throws Exception {
-                        return rest.getTickers(1)
-                                .toMaybe()
-                                .onErrorResumeNext(new Function<Throwable, MaybeSource<? extends Tickers>>() {
-                                    @Override
-                                    public MaybeSource<? extends Tickers> apply(@NonNull Throwable throwable) throws Exception {
-                                        Log.e("AASSDD", "error", throwable);
-                                        return Maybe.empty();
-                                    }
-                                });
-                    }
-                })
-                .subscribe(new Consumer<Tickers>() {
-                    @Override
-                    public void accept(@NonNull Tickers tickers) throws Exception {
-                        Log.d("AASSDD", tickers.toString());
-                        showNotification(tickers);
-                    }
-                });
+        new Thread(loadRunnable).start();
     }
 
     @Override
     public void onDestroy() {
-        if (disposable != null) disposable.dispose();
+        isDestroyed = true;
         super.onDestroy();
     }
 
-    private void showNotification(Tickers tickers) {
+    private void showNotification(Map<String, Double> lastPrices) {
         NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
-        bigTextStyle.bigText(
-                "btc_usd\t" + tickers.btc_usd.getLast() + "\n"
-                        + "btc_rur\t\t" + tickers.btc_rur.getLast() + "\n"
-                        + "ltc_usd\t\t" + tickers.ltc_usd.getLast() + "\n"
-                        + "ltc_rur\t\t" + tickers.ltc_rur.getLast() + "\n"
-                        + "eth_usd\t" + tickers.eth_usd.getLast() + "\n"
-                        + "eth_rur\t\t" + tickers.eth_rur.getLast()
-        );
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String pair : PAIRS) {
+            stringBuilder.append(pair).append(' ').append(lastPrices.get(pair)).append('\n');
+        }
+        bigTextStyle.bigText(stringBuilder.toString());
 
         startForeground(1, new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.notification_icon)
                 .setTicker(getString(R.string.app_name))
                 .setContentTitle(getString(R.string.app_name))
+                .setContentText(PAIRS[0] + " " + lastPrices.get(PAIRS[0]))
                 .setStyle(bigTextStyle)
                 .setOngoing(true)
                 .setShowWhen(true)
