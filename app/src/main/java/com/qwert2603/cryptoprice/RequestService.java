@@ -12,6 +12,8 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
 public class RequestService extends Service {
 
@@ -21,7 +23,6 @@ public class RequestService extends Service {
 
             "ltc_btc",
             "ltc_usd",
-            "ltc_rur",
 
             "eth_btc",
             "eth_usd",
@@ -29,10 +30,14 @@ public class RequestService extends Service {
             "dsh_btc",
             "dsh_usd",
 
+            "bch_btc",
+            "bch_usd",
+
             "nmc_btc",
             "nvc_btc",
             "ppc_btc",
 
+//            "ltc_rur",
 //            "usd_rur",
 //            "btc_eur",
 //            "ltc_eur",
@@ -61,7 +66,7 @@ public class RequestService extends Service {
                 InputStream inputStream = null;
                 try {
                     StringBuilder stringBuilder = new StringBuilder();
-                    stringBuilder.append("https://btc-e.nz/api/3/ticker/");
+                    stringBuilder.append("https://wex.nz/api/3/ticker/");
                     for (String pair : PAIRS) {
                         stringBuilder.append(pair).append('-');
                     }
@@ -130,16 +135,22 @@ public class RequestService extends Service {
     private void showNotification(double[] lastPrices) {
         Notification.BigTextStyle bigTextStyle = new Notification.BigTextStyle();
         StringBuilder stringBuilder = new StringBuilder();
+        List<Integer> newLines = Arrays.asList(1, 3, 5, 7, 9, 10, 11, 12);
         for (int i = 0; i < PAIRS.length; i++) {
-            stringBuilder.append(PAIRS[i]).append(' ').append(lastPrices[i]).append('\n');
+            stringBuilder
+                    .append(PAIRS[i])
+                    .append(' ')
+                    .append(lastPrices[i])
+                    .append(newLines.contains(i) ? '\n' : ' ');
         }
         bigTextStyle.bigText(stringBuilder.toString());
 
         startForeground(1, new Notification.Builder(this)
                 .setSmallIcon(R.drawable.icon)
                 .setTicker(getString(R.string.app_name))
+                .setColor(0x007B00)
                 .setContentTitle(getString(R.string.app_name))
-                .setContentText(PAIRS[0] + " " + lastPrices[0])
+                .setContentText(PAIRS[0] + " " + lastPrices[0] + " " + PAIRS[1] + " " + lastPrices[1])
                 .setStyle(bigTextStyle)
                 .setOngoing(true)
                 .setShowWhen(true)

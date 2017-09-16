@@ -23,15 +23,3 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
-
--dontwarn okio.**
--dontwarn okhttp3.**
--dontwarn javax.annotation.**
--dontwarn retrofit2.**
-
--dontnote retrofit2.Platform
--keepattributes Signature
--keepattributes Exceptions
-
--keep class com.qwert2603.cryptoprice.Ticker { *; }
--keep class com.qwert2603.cryptoprice.Tickers { *; }

@@ -11,9 +11,9 @@
 
         <path
             android:pathData="M1 1 S9 9 4.7 8.5 8 3 9 8.3"
-            android:strokeColor="#FF8000"
+            android:strokeColor="#007B00"
             android:strokeLineCap="round"
-            android:strokeWidth="0.6" />
+            android:strokeWidth="0.7" />
 
     </group>
 
