@@ -1,9 +1,12 @@
 package com.qwert2603.cryptoprice;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
 
 import org.json.JSONObject;
@@ -17,7 +20,7 @@ import java.util.List;
 
 public class RequestService extends Service {
 
-    public static final String[] PAIRS = {
+    private static final String[] PAIRS = {
             "btc_usd",
             "btc_rur",
 
@@ -54,6 +57,12 @@ public class RequestService extends Service {
 //            "eth_ltc",
 //            "eth_rur",
     };
+
+    private static final int NOTIFICATION_ID = 1;
+
+    private static final String CHANNEL_ID = "channel_cr_pr";
+
+    private static final boolean HAS_OREO = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
 
     private volatile boolean isDestroyed = false;
 
@@ -112,7 +121,13 @@ public class RequestService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        startForeground(1, new Notification.Builder(this)
+        if (HAS_OREO) {
+            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "current price", NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        startForeground(NOTIFICATION_ID, (HAS_OREO ? new Notification.Builder(this, CHANNEL_ID) : new Notification.Builder(this))
                 .setSmallIcon(R.drawable.icon)
                 .setTicker(getString(R.string.app_name))
                 .setContentTitle(getString(R.string.app_name))
@@ -145,7 +160,7 @@ public class RequestService extends Service {
         }
         bigTextStyle.bigText(stringBuilder.toString());
 
-        startForeground(1, new Notification.Builder(this)
+        startForeground(NOTIFICATION_ID, (HAS_OREO ? new Notification.Builder(this, CHANNEL_ID) : new Notification.Builder(this))
                 .setSmallIcon(R.drawable.icon)
                 .setTicker(getString(R.string.app_name))
                 .setColor(0x007B00)
