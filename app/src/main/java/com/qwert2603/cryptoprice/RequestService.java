@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 
 import org.json.JSONObject;
 
@@ -122,7 +123,10 @@ public class RequestService extends Service {
         super.onCreate();
 
         if (HAS_OREO) {
-            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "current price", NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "current price", NotificationManager.IMPORTANCE_LOW);
+            notificationChannel.enableVibration(false);
+            notificationChannel.enableLights(false);
+            notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             notificationManager.createNotificationChannel(notificationChannel);
         }
@@ -144,6 +148,10 @@ public class RequestService extends Service {
     @Override
     public void onDestroy() {
         isDestroyed = true;
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .edit()
+                .putBoolean(MainActivity.KEY_SERVICE_ON, false)
+                .apply();
         super.onDestroy();
     }
 
