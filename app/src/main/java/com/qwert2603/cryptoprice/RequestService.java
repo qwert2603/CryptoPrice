@@ -5,10 +5,12 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import org.json.JSONObject;
 
@@ -20,6 +22,15 @@ import java.util.Arrays;
 import java.util.List;
 
 public class RequestService extends Service {
+
+    public static void makeStart(Context context) {
+        Intent intent = new Intent(context, RequestService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent);
+        } else {
+            context.startService(intent);
+        }
+    }
 
     private static final String[] PAIRS = {
             "btc_usd",
@@ -73,17 +84,19 @@ public class RequestService extends Service {
             while (true) {
                 if (isDestroyed) break;
 
-                InputStream inputStream = null;
-                try {
-                    StringBuilder stringBuilder = new StringBuilder();
-                    stringBuilder.append("https://wex.nz/api/3/ticker/");
-                    for (String pair : PAIRS) {
-                        stringBuilder.append(pair).append('-');
-                    }
-                    stringBuilder.append("?ignore_invalid=1");
-                    inputStream = new URL(stringBuilder.toString()).openStream();
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("https://wex.nz/api/3/ticker/");
+                for (String pair : PAIRS) {
+                    stringBuilder.append(pair).append('-');
+                }
+                stringBuilder.append("?ignore_invalid=1");
+
+                final String url = stringBuilder.toString();
+                Log.d("RequestService", "request to " + url);
+                try (InputStream inputStream = new URL(url).openStream()) {
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                     String line = bufferedReader.readLine();
+                    Log.d("RequestService", "response is " + line);
                     JSONObject jsonObject = new JSONObject(line);
                     double[] lastPrices = new double[PAIRS.length];
                     for (int i = 0; i < PAIRS.length; i++) {
@@ -91,13 +104,6 @@ public class RequestService extends Service {
                     }
                     if (!isDestroyed) showNotification(lastPrices);
                 } catch (Exception ignored) {
-                } finally {
-                    if (inputStream != null) {
-                        try {
-                            inputStream.close();
-                        } catch (Exception ignored) {
-                        }
-                    }
                 }
 
                 try {

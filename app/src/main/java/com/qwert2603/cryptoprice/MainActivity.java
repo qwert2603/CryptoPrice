@@ -24,11 +24,10 @@ public class MainActivity extends Activity {
         switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Intent intent = new Intent(MainActivity.this, RequestService.class);
                 if (isChecked) {
-                    startService(intent);
+                    RequestService.makeStart(MainActivity.this);
                 } else {
-                    stopService(intent);
+                    stopService(new Intent(MainActivity.this, RequestService.class));
                 }
                 sharedPreferences.edit().putBoolean(KEY_SERVICE_ON, isChecked).apply();
             }

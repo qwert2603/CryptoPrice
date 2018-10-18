@@ -6,18 +6,18 @@ android {
         applicationId "com.qwert2603.cryptoprice"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 5
-        versionName "1.3"
+        versionCode 6
+        versionName "1.4"
     }
     buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-snapshot'
+        }
         release {
             shrinkResources true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-}
-
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
 }

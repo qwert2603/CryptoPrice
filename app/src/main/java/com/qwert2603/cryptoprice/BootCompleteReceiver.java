@@ -12,7 +12,7 @@ public class BootCompleteReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (!Objects.equals(intent.getAction(), Intent.ACTION_BOOT_COMPLETED)) return;
         if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(MainActivity.KEY_SERVICE_ON, false)) {
-            context.startService(new Intent(context, RequestService.class));
+            RequestService.makeStart(context);
         }
     }
 }
