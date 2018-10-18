@@ -17,12 +17,14 @@ public class MainActivity extends Activity {
 
     public static final String KEY_SERVICE_ON = "KEY_SERVICE_ON";
 
+    private SharedPreferences sharedPreferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         Switch switchCompat = findViewById(R.id.enable_Switch);
         switchCompat.setChecked(sharedPreferences.getBoolean(KEY_SERVICE_ON, false));
@@ -50,5 +52,13 @@ public class MainActivity extends Activity {
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (sharedPreferences.getBoolean(KEY_SERVICE_ON, false)) {
+            RequestService.makeStart(MainActivity.this);
+        }
     }
 }
