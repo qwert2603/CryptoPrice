@@ -3,10 +3,15 @@ package com.qwert2603.cryptoprice;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
+import android.text.Html;
+import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
@@ -30,6 +35,19 @@ public class MainActivity extends Activity {
                     stopService(new Intent(MainActivity.this, RequestService.class));
                 }
                 sharedPreferences.edit().putBoolean(KEY_SERVICE_ON, isChecked).apply();
+            }
+        });
+
+        final TextView launchInfoTextView = this.findViewById(R.id.launchInfo_TextView);
+        launchInfoTextView.setText(Html.fromHtml(getString(R.string.launch_info)));
+        launchInfoTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", getPackageName(), null)
+                );
+                startActivity(intent);
             }
         });
     }

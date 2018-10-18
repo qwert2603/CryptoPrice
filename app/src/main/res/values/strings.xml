@@ -3,4 +3,9 @@
     <string name="enable_text">enable</string>
     <string name="loading_text">loading..</string>
     <string name="dev_info">dev\'s telegram: qwert2603</string>
+    <string name="launch_info">
+        <![CDATA[
+        to work correctly, you may need to enable autorun in the <a href="">system settings</a> of the application
+        ]]>
+    </string>
 </resources>
