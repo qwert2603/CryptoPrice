@@ -6,8 +6,8 @@ android {
         applicationId "com.qwert2603.cryptoprice"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 6
-        versionName "1.4"
+        versionCode 7
+        versionName "1.4.1"
     }
     buildTypes {
         debug {
