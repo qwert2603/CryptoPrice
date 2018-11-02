@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import org.json.JSONObject;
 
@@ -24,6 +23,7 @@ import java.util.List;
 public class RequestService extends Service {
 
     public static void makeStart(Context context) {
+        LogUtils.d("RequestService makeStart");
         Intent intent = new Intent(context, RequestService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(intent);
@@ -92,11 +92,11 @@ public class RequestService extends Service {
                 stringBuilder.append("?ignore_invalid=1");
 
                 final String url = stringBuilder.toString();
-                Log.d("RequestService", "request to " + url);
+                LogUtils.d("RequestService " + RequestService.this.hashCode() + " request to " + url);
                 try (InputStream inputStream = new URL(url).openStream()) {
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                     String line = bufferedReader.readLine();
-                    Log.d("RequestService", "response is " + line);
+                    LogUtils.d("RequestService " + RequestService.this.hashCode() + " response is " + line);
                     JSONObject jsonObject = new JSONObject(line);
                     double[] lastPrices = new double[PAIRS.length];
                     for (int i = 0; i < PAIRS.length; i++) {
@@ -121,12 +121,14 @@ public class RequestService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        LogUtils.d("RequestService " + hashCode() + " onCreate");
 
         if (HAS_OREO) {
             NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "current price", NotificationManager.IMPORTANCE_LOW);
@@ -153,6 +155,8 @@ public class RequestService extends Service {
 
     @Override
     public void onDestroy() {
+        LogUtils.d("RequestService " + hashCode() + " onDestroy");
+
         isDestroyed = true;
         PreferenceManager.getDefaultSharedPreferences(this)
                 .edit()
