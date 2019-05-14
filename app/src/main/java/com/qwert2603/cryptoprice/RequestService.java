@@ -1,5 +1,6 @@
 package com.qwert2603.cryptoprice;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -11,6 +12,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -35,42 +37,21 @@ public class RequestService extends Service {
     }
 
     private static final String[] PAIRS = {
-            "btc_usd",
-            "btc_rur",
+            "BTCUSDT",
 
-            "ltc_btc",
-            "ltc_usd",
-
-            "eth_btc",
-            "eth_usd",
-
-            "dsh_btc",
-            "dsh_usd",
-
-            "bch_btc",
-            "bch_usd",
-
-            "nmc_btc",
-            "nvc_btc",
-            "ppc_btc",
-
-//            "ltc_rur",
-//            "usd_rur",
-//            "btc_eur",
-//            "ltc_eur",
-//            "nmc_usd",
-//            "nvc_usd",
-//            "eur_usd",
-//            "eur_rur",
-//            "ppc_usd",
-//            "dsh_rur",
-//            "dsh_eur",
-//            "dsh_ltc",
-//            "dsh_eth",
-//            "eth_eur",
-//            "eth_ltc",
-//            "eth_rur",
+            "ETHUSDT", "ETHBTC",
+            "BNBUSDT", "BNBBTC",
+            "LTCUSDT", "LTCBTC",
+            "TRXUSDT", "TRXBTC",
+            "XRPUSDT", "XRPBTC",
     };
+
+    private static int indexOfPair(String s) {
+        for (int i = 0; i < PAIRS.length; i++) {
+            if (s.equals(PAIRS[i])) return i;
+        }
+        return -1;
+    }
 
     private static final int NOTIFICATION_ID = 1;
 
@@ -81,26 +62,23 @@ public class RequestService extends Service {
     private final Runnable loadRunnable = new Runnable() {
         @Override
         public void run() {
-            while (true) {
-                if (isDestroyed) break;
-
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("https://wex.nz/api/3/ticker/");
-                for (String pair : PAIRS) {
-                    stringBuilder.append(pair).append('-');
-                }
-                stringBuilder.append("?ignore_invalid=1");
-
-                final String url = stringBuilder.toString();
+            while (!isDestroyed) {
+                final String url = "https://api.binance.com/api/v3/ticker/price";
                 LogUtils.d("RequestService " + RequestService.this.hashCode() + " request to " + url);
                 try (InputStream inputStream = new URL(url).openStream()) {
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                     String line = bufferedReader.readLine();
                     LogUtils.d("RequestService " + RequestService.this.hashCode() + " response is " + line);
-                    JSONObject jsonObject = new JSONObject(line);
                     double[] lastPrices = new double[PAIRS.length];
-                    for (int i = 0; i < PAIRS.length; i++) {
-                        lastPrices[i] = jsonObject.getJSONObject(PAIRS[i]).getDouble("last");
+
+                    JSONArray jsonArray = new JSONArray(line);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        String symbol = jsonObject.getString("symbol");
+                        int indexOf = indexOfPair(symbol);
+                        if (indexOf >= 0) {
+                            lastPrices[indexOf] = jsonObject.getDouble("price");
+                        }
                     }
                     if (!isDestroyed) showNotification(lastPrices);
                 } catch (Exception ignored) {
@@ -165,16 +143,17 @@ public class RequestService extends Service {
         super.onDestroy();
     }
 
+    @SuppressLint("DefaultLocale")
     private void showNotification(double[] lastPrices) {
         Notification.BigTextStyle bigTextStyle = new Notification.BigTextStyle();
         StringBuilder stringBuilder = new StringBuilder();
-        List<Integer> newLines = Arrays.asList(1, 3, 5, 7, 9, 10, 11, 12);
+        List<Integer> newLines = Arrays.asList(0, 2, 4, 6, 8);
         for (int i = 0; i < PAIRS.length; i++) {
             stringBuilder
                     .append(PAIRS[i])
                     .append(' ')
-                    .append(lastPrices[i])
-                    .append(newLines.contains(i) ? '\n' : ' ');
+                    .append(String.format("%f", lastPrices[i]))
+                    .append(newLines.contains(i) ? '\n' : "\t\t\t");
         }
         bigTextStyle.bigText(stringBuilder.toString());
 
@@ -183,7 +162,7 @@ public class RequestService extends Service {
                 .setTicker(getString(R.string.app_name))
                 .setColor(0x007B00)
                 .setContentTitle(getString(R.string.app_name))
-                .setContentText(PAIRS[0] + " " + lastPrices[0] + " " + PAIRS[1] + " " + lastPrices[1])
+                .setContentText(PAIRS[0] + " " + lastPrices[0])
                 .setStyle(bigTextStyle)
                 .setOngoing(true)
                 .setShowWhen(true)

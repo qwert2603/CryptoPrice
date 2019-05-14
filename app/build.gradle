@@ -5,7 +5,7 @@ android {
         config {
             storeFile file('/home/alex/StudioProjects/key.jks')
             storePassword key_store_password
-            keyAlias 'cryptoprice'
+            keyAlias 'crypto_price'
             keyPassword key_store_password
         }
     }
