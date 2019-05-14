@@ -1,13 +1,24 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            storeFile file('/home/alex/StudioProjects/key.jks')
+            storePassword key_store_password
+            keyAlias 'cryptoprice'
+            keyPassword key_store_password
+        }
+    }
+
     compileSdkVersion 28
+    buildToolsVersion "28.0.3"
     defaultConfig {
         applicationId "com.qwert2603.cryptoprice"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 7
-        versionName "1.4.1"
+        versionCode 8
+        versionName "1.5.0"
+        archivesBaseName = "cryptoprice-$versionName"
     }
     buildTypes {
         debug {
@@ -17,7 +28,8 @@ android {
         release {
             shrinkResources true
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
 }

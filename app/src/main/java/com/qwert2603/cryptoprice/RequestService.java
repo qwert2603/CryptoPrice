@@ -22,10 +22,12 @@ import java.util.List;
 
 public class RequestService extends Service {
 
+    private static final boolean HAS_OREO = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
+
     public static void makeStart(Context context) {
         LogUtils.d("RequestService makeStart");
         Intent intent = new Intent(context, RequestService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (HAS_OREO) {
             context.startForegroundService(intent);
         } else {
             context.startService(intent);
@@ -73,8 +75,6 @@ public class RequestService extends Service {
     private static final int NOTIFICATION_ID = 1;
 
     private static final String CHANNEL_ID = "channel_cr_pr";
-
-    private static final boolean HAS_OREO = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
 
     private volatile boolean isDestroyed = false;
 
