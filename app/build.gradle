@@ -16,8 +16,8 @@ android {
         applicationId "com.qwert2603.cryptoprice"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 8
-        versionName "1.5.0"
+        versionCode 9
+        versionName "1.5.1"
         archivesBaseName = "cryptoprice-$versionName"
     }
     buildTypes {
