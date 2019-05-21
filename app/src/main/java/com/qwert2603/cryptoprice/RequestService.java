@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -136,10 +135,6 @@ public class RequestService extends Service {
         LogUtils.d("RequestService " + hashCode() + " onDestroy");
 
         isDestroyed = true;
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .edit()
-                .putBoolean(MainActivity.KEY_SERVICE_ON, false)
-                .apply();
         super.onDestroy();
     }
 

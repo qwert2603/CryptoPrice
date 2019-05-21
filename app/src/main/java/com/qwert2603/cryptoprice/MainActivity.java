@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        final TextView launchInfoTextView = this.findViewById(R.id.launchInfo_TextView);
+        final TextView launchInfoTextView = findViewById(R.id.launchInfo_TextView);
         launchInfoTextView.setText(Html.fromHtml(getString(R.string.launch_info)));
         launchInfoTextView.setOnClickListener(new View.OnClickListener() {
             @Override
